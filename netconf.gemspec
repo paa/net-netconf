@@ -9,9 +9,9 @@ Gem::Specification.new do |s|
   s.description = "Ruby NetConf client"
   s.homepage = 'https://github.com/kkirsche/net-netconf'
   s.authors = ["Kevin Kirsche"]
-  s.email = 'jschulman@juniper.net'
+  s.email = 'kev.kirsche@juniper.net'
   s.files = FileList['lib/net/**/*.rb', 'examples/**/*.rb']
-  s.add_dependency('nokogiri', '>= 1.5.5')
+  s.add_dependency('nokogiri', '>= 1.6.6')
   s.add_dependency('net-ssh-multi', '>= 1.2.1')
-  s.add_dependency('net-scp')
+  s.add_dependency('net-scp', '>= 1.2.1')
 end
