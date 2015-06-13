@@ -12,6 +12,6 @@ Gem::Specification.new do |s|
   s.email = 'jschulman@juniper.net'
   s.files = FileList['lib/net/**/*.rb', 'examples/**/*.rb']
   s.add_dependency('nokogiri', '>= 1.5.5')
-  s.add_dependency('net-ssh-multi', '~1.2.1')
+  s.add_dependency('net-ssh-multi', '>= 1.2.1')
   s.add_dependency('net-scp')
 end
