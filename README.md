@@ -104,7 +104,8 @@ You must enclose the parameters hash to disambiquate it from the attributes hash
 a variable for the parameters hash.
 
 ```ruby
- dev.rpc.get_interface_information({ interface_name: 'ge-0/0/0', terse: true }, { format: 'text'})
+ dev.rpc.get_interface_information({ interface_name: 'ge-0/0/0', terse: true },
+                                   { format: 'text'})
 
  # <rpc>
  #    <get-interface-information format='text'>
