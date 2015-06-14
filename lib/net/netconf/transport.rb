@@ -17,7 +17,6 @@ module Netconf
     attr_writer :timeout, :waitio
 
     def initialize( &block )
-
       @state = :NETCONF_CLOSED
       @os_type = @args[:os_type] || Netconf::DEFAULT_OS_TYPE
 
@@ -25,11 +24,10 @@ module Netconf
       @rpc_message_id = 1
 
       if block_given?
-        open( &block = nil )      # do not pass this block to open()
+        open(&block = nil)      # do not pass this block to open()
         yield self
         close()
       end
-
     end # initialize
 
     def open?
