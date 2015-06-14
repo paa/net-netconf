@@ -156,6 +156,7 @@ module Netconf
         end
         @trans.rpc_exec(rpc_nx)
       end
-    end # module: JUNOS
-  end # module: RPC
-end # module: Netconf
+      end # module: JUNOS
+    end # module: RPC
+  end # module: Netconf
+end
