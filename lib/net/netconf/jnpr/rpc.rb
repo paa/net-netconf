@@ -30,6 +30,14 @@ module Netconf
         @trans.rpc_exec( rpc )
       end
 
+      def nokogiri_case(arg)
+        filter_or_config = case arg
+          when Nokogiri::XML::Builder  then arg.doc.root
+          when Nokogiri::XML::Document then arg.root
+          else arg
+          end
+      end
+
       def get_configuration( *args )
 
         filter = nil
@@ -37,11 +45,7 @@ module Netconf
         while arg = args.shift
           case arg.class.to_s
           when /^Nokogiri/
-            filter = case arg
-              when Nokogiri::XML::Builder  then arg.doc.root
-              when Nokogiri::XML::Document then arg.root
-              else arg
-              end
+            nokogiri_case(arg)
           when 'Hash' then attrs = arg
           end
         end
@@ -72,11 +76,7 @@ module Netconf
         while arg = args.shift
           case arg.class.to_s
           when /^Nokogiri/
-            config = case arg
-              when Nokogiri::XML::Builder  then arg.doc.root
-              when Nokogiri::XML::Document then arg.root
-              else arg
-              end
+            nokogiri_case(arg)
           when 'Hash' then attrs.merge! arg
           when 'Array' then config = arg.join("\n")
           when 'String' then config = arg
