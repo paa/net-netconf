@@ -155,27 +155,27 @@ To retrieve configuration from a device, use the `get-config` RPC.  Here is an e
    # ----------------------------------------------------------------------
    # specifying a filter as a block to get_config
 
-   cfgsvc1 = dev.rpc.get_config{ |x|
-     x.configuration { x.system { x.services }}
-   }
+   cfgsvc1 = dev.rpc.get_config do |x|
+     x.configuration { x.system { x.services } }
+   end
 
    puts 'Retrieved services as BLOCK:'
-   cfgsvc1.xpath('//services/*').each{|s| puts s.name }
+   cfgsvc1.xpath('//services/*').each { |s| puts s.name }
 
    # ----------------------------------------------------------------------
    # specifying a filter as a parameter to get_config
 
-   filter = Nokogiri::XML::Builder.new{ |x|
-     x.configuration { x.system { x.services }}
-   }
+   filter = Nokogiri::XML::Builder.new do |x|
+     x.configuration { x.system { x.services } }
+   end
 
-   cfgsvc2 = dev.rpc.get_config( filter )
+   cfgsvc2 = dev.rpc.get_config(filter)
    puts 'Retrieved services as PARAM:'
-   cfgsvc2.xpath('//services/*').each{|s| puts s.name }
+   cfgsvc2.xpath('//services/*').each { |s| puts s.name }
 
-   cfgsvc3 = dev.rpc.get_config( filter )
+   cfgsvc3 = dev.rpc.get_config(filter)
    puts 'Retrieved services as PARAM, re-used filter'
-   cfgsvc3.xpath('//services/*').each{|s| puts s.name }
+   cfgsvc3.xpath('//services/*').each { |s| puts s.name }
  }
 ```
 
@@ -202,15 +202,17 @@ others in the __examples__ directory:
 
     # JUNOS toplevel element is 'configuration'
 
-    location = Nokogiri::XML::Builder.new{ |x| x.configuration {
-      x.system {
-        x.location {
-          x.building 'Main Campus, A'
-          x.floor 5
-          x.rack 27
+    location = Nokogiri::XML::Builder.new do |x|
+      x.configuration {
+        x.system {
+          x.location {
+            x.building 'Main Campus, A'
+            x.floor 5
+            x.rack 27
+          }
         }
       }
-    }}
+    end
 
     begin
       rsp = dev.rpc.lock target
@@ -218,16 +220,18 @@ others in the __examples__ directory:
       # --------------------------------------------------------------------
       # configuration as BLOCK
 
-      rsp = dev.rpc.edit_config{ |x| x.configuration {
-        x.system {
-          x.send(:'host-name', new_host_name )
+      rsp = dev.rpc.edit_config do |x|
+        x.configuration {
+          x.system {
+            x.send(:'host-name', new_host_name )
+          }
         }
-      }}
+      end
 
       # --------------------------------------------------------------------
       # configuration as PARAM
 
-      rsp = dev.rpc.edit_config( location )
+      rsp = dev.rpc.edit_config(location)
 
       rsp = dev.rpc.validate target
       rpc = dev.rpc.commit
