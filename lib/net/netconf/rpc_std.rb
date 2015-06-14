@@ -1,7 +1,7 @@
 module Netconf
   module RPC
 
-    MSG_END = "]]>]]>"
+    MSG_END = ']]>]]>'
     MSG_END_RE = /\]\]>\]\]>[\r\n]*$/
     MSG_CLOSE_SESSION = '<rpc><close-session/></rpc>'
     MSG_HELLO = <<-EOM
@@ -9,7 +9,7 @@ module Netconf
   <capabilities>
     <capability>urn:ietf:params:netconf:base:1.0</capability>
   </capabilities>
-</hello>]]>]]>
+</hello>
 EOM
 
   module Standard
