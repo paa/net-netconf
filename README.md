@@ -2,8 +2,8 @@
 
 ## Description:
 
-Device management using the NetConf protocol as specified in {RFC4741}[http://tools.ietf.org/html/rfc4741]
-and {RFC6241}[http://tools.ietf.org/html/rfc6241].
+Device management using the NetConf protocol as specified in [RFC4741](http://tools.ietf.org/html/rfc4741)
+and [RFC6241](http://tools.ietf.org/html/rfc6241).
 
 ## Features:
 
@@ -18,7 +18,7 @@ and {RFC6241}[http://tools.ietf.org/html/rfc6241].
 * Flexible RPC mechanism
   * Netconf::RPC::Builder to metaprogram RPCs
   * Vendor extension framework for custom RPCs
-* XML processing using {Nokogiri}[http://nokogiri.org]
+* XML processing using [Nokogiri](http://nokogiri.org)
 
 ## Synopsis:
 
@@ -68,13 +68,13 @@ dev.close
 
 ### Remote Procedure Calls (RPCs):
 
-Each Netconf session provides a readable instance variable - *rpc*. This is used to execute Remote Procedure Calls (RPCs).
+Each Netconf session provides a readable instance variable - __rpc__. This is used to execute Remote Procedure Calls (RPCs).
 The @rpc will include the NETCONF standard RPCs, any vendor specific extension, as well as the ability
 to metaprogram new onces via method_missing.
 
 Here are some examples to illustrate the metaprogamming:
 
-Without any parameters, the RPC is created by swapping underscores (_) to hyphens (-):
+Without any parameters, the RPC is created by swapping underscores (`_`) to hyphens (`-`):
 
 ```ruby
  require 'net/netconf'
