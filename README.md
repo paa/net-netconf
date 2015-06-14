@@ -9,14 +9,14 @@ and [RFC6241](http://tools.ietf.org/html/rfc6241).
 
 * Extensible protocol transport framework for SSH and non-SSH
   * SSH transport using [Net::SSH::Multi](https://github.com/jamis/net-ssh-multi)
-  * Telnet transport using Net::Telnet (Ruby Library)
+  * Telnet transport using `Net::Telnet` (Ruby Library)
   * Serial transport using [Ruby/SerialPort](http://ruby-serialport.rubyforge.org/)
 * NETCONF Standard RPCs
-  * get-config, edit-config
-  * lock, unlock
-  * validate, discard-changes
+  * `get-config`, `edit-config`
+  * `lock`, `unlock`
+  * `validate`, `discard-changes`
 * Flexible RPC mechanism
-  * Netconf::RPC::Builder to metaprogram RPCs
+  * `Netconf::RPC::Builder` to metaprogram RPCs
   * Vendor extension framework for custom RPCs
 * XML processing using [Nokogiri](http://nokogiri.org)
 
@@ -28,11 +28,11 @@ require 'net/netconf'
 # create the options hash for the new NETCONF session.  If you are
 # using ssh-agent, then omit the :password
 
-login = { :target => 'vsrx', :username => "jeremy", :password => "jeremy1" }
+login = { target: 'vsrx', username: 'root', password: 'Amnesia' }
 
 # provide a block and the session will open, execute, and close
 
-Netconf::SSH.new( login ){ |dev|
+Netconf::SSH.new(login){ |dev|
 
   # perform the RPC command:
   # <rpc>
@@ -43,8 +43,8 @@ Netconf::SSH.new( login ){ |dev|
 
   # The response is in Nokogiri XML format for easy processing ...
 
-  puts "Chassis: " + inv.xpath('chassis/description').text
-  puts "Chassis Serial-Number: " + inv.xpath('chassis/serial-number').text
+  puts 'Chassis: ' + inv.xpath('chassis/description').text
+  puts 'Chassis Serial-Number: ' + inv.xpath('chassis/serial-number').text
 }
 ```
 
@@ -53,13 +53,13 @@ Alternative explicity open, execute RPCs, and close
 ```ruby
 require 'net/netconf'
 
-dev = Netconf::SSH.new( login )
+dev = Netconf::SSH.new(login)
 dev.open
 
 inv = dev.rpc.get_chassis_inventory
 
-puts "Chassis: " + inv.xpath('chassis/description').text
-puts "Chassis Serial-Number: " + inv.xpath('chassis/serial-number').text
+puts 'Chassis: ' + inv.xpath('chassis/description').text
+puts 'Chassis Serial-Number: ' + inv.xpath('chassis/serial-number').text
 
 dev.close
 ```
@@ -89,7 +89,7 @@ Without any parameters, the RPC is created by swapping underscores (`_`) to hyph
 You can optionally provide RPC parameters as a hash:
 
 ```ruby
- dev.rpc.get_interface_information( :interface_name => 'ge-0/0/0', :terse => true )
+ dev.rpc.get_interface_information(interface_name: 'ge-0/0/0', terse: true)
 
  # <rpc>
  #    <get-interface-information>
@@ -97,15 +97,14 @@ You can optionally provide RPC parameters as a hash:
  #       <terse/>
  #   </get-interface-information>
  # </rpc>
- ```
+```
 
 You can additionally supply attributes that get assigned to the toplevel element.  In this case
 You must enclose the parameters hash to disambiquate it from the attributes hash, or declare
 a variable for the parameters hash.
 
 ```ruby
- dev.rpc.get_interface_information({ :interface_name => 'ge-0/0/0', :terse => true },
-    { :format => 'text'} )
+ dev.rpc.get_interface_information({ interface_name: 'ge-0/0/0', terse: true }, { format: 'text'})
 
  # <rpc>
  #    <get-interface-information format='text'>
@@ -118,7 +117,7 @@ a variable for the parameters hash.
 If you want to provide attributes, but no parameters, then:
 
 ```ruby
- dev.rpc.get_chassis_inventory( nil, :format => 'text' )
+ dev.rpc.get_chassis_inventory(nil, format: 'text')
 
  # <rpc>
  #    <get-chassis-inventory format='text'/>
@@ -127,26 +126,25 @@ If you want to provide attributes, but no parameters, then:
 
 ### Retrieving Configuration:
 
-To retrieve configuration from a device, use the *get-config* RPC.  Here is an example, but you can find
-others in the *examples* directory:
+To retrieve configuration from a device, use the `get-config` RPC.  Here is an example, but you can find others in the __examples__ directory:
 
 ```ruby
  require 'net/netconf'
 
 
- login = { :target => 'vsrx', :username => "jeremy", :password => "jeremy1" }
+ login = { target: 'vsrx', username: 'root', password: 'Amnesia' }
 
  puts "Connecting to device: #{login[:target]}"
 
- Netconf::SSH.new( login ){ |dev|
-   puts "Connected."
+ Netconf::SSH.new(login){ |dev|
+   puts 'Connected.'
 
    # ----------------------------------------------------------------------
    # retrieve the full config.  Default source is 'running'
    # Alternatively you can pass the source name as a string parameter
    # to #get_config
 
-   puts "Retrieving full config, please wait ... "
+   puts 'Retrieving full config, please wait ... '
    cfgall = dev.rpc.get_config
    puts "Showing 'system' hierarchy ..."
    puts cfgall.xpath('configuration/system')     # JUNOS toplevel config element is <configuration>
@@ -158,7 +156,7 @@ others in the *examples* directory:
      x.configuration { x.system { x.services }}
    }
 
-   puts "Retrieved services as BLOCK:"
+   puts 'Retrieved services as BLOCK:'
    cfgsvc1.xpath('//services/*').each{|s| puts s.name }
 
    # ----------------------------------------------------------------------
@@ -169,33 +167,33 @@ others in the *examples* directory:
    }
 
    cfgsvc2 = dev.rpc.get_config( filter )
-   puts "Retrieved services as PARAM:"
+   puts 'Retrieved services as PARAM:'
    cfgsvc2.xpath('//services/*').each{|s| puts s.name }
 
    cfgsvc3 = dev.rpc.get_config( filter )
-   puts "Retrieved services as PARAM, re-used filter"
+   puts 'Retrieved services as PARAM, re-used filter'
    cfgsvc3.xpath('//services/*').each{|s| puts s.name }
  }
- ```
+```
 
-__Note:__ There is a JUNOS RPC, *get-configuration*, that provides Juniper specific extensions as well.
+__Note:__ There is a JUNOS RPC, `get-configuration`, that provides Juniper specific extensions as well.
 
 ### Changing Configuration:
 
-To retrieve configuration from a device, use the *edit-config* RPC.  Here is an example, but you can find
-others in the *examples* directory:
+To retrieve configuration from a device, use the `edit-config` RPC.  Here is an example, but you can find
+others in the __examples__ directory:
 
 ```ruby
   require 'net/netconf'
 
-  login = { :target => 'vsrx', :username => "jeremy", :password => "jeremy1" }
+  login = { target: 'vsrx', username: 'root', password: 'Amnesia' }
 
-  new_host_name = "vsrx-abc"
+  new_host_name = 'vsrx-abc'
 
   puts "Connecting to device: #{login[:target]}"
 
-  Netconf::SSH.new( login ){ |dev|
-    puts "Connected!"
+  Netconf::SSH.new(login){ |dev|
+    puts 'Connected!'
 
     target = 'candidate'
 
@@ -204,7 +202,7 @@ others in the *examples* directory:
     location = Nokogiri::XML::Builder.new{ |x| x.configuration {
       x.system {
         x.location {
-          x.building "Main Campus, A"
+          x.building 'Main Campus, A'
           x.floor 5
           x.rack 27
         }
@@ -212,7 +210,6 @@ others in the *examples* directory:
     }}
 
     begin
-
       rsp = dev.rpc.lock target
 
       # --------------------------------------------------------------------
@@ -234,22 +231,22 @@ others in the *examples* directory:
       rpc = dev.rpc.unlock target
 
     rescue Netconf::LockError => e
-      puts "Lock error"
+      puts 'Lock error'
     rescue Netconf::EditError => e
-      puts "Edit error"
+      puts 'Edit error'
     rescue Netconf::ValidateError => e
-      puts "Validate error"
+      puts 'Validate error'
     rescue Netconf::CommitError => e
-      puts "Commit error"
+      puts 'Commit error'
     rescue Netconf::RpcError => e
-      puts "General RPC error"
+      puts 'General RPC error'
     else
-      puts "Configuration Committed."
+      puts 'Configuration Committed.'
     end
   }
 ```
 
-__Note:__ There is a JUNOS RPC, *load-configuration*, that provides Juniper specific extensions as well.
+__Note:__ There is a JUNOS RPC, `load-configuration`, that provides Juniper specific extensions as well.
 
 ## Original License:
 
@@ -283,3 +280,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 The views and conclusions contained in the software and documentation are those
 of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of Juniper Networks.
+
+Original Authors:
+* Jeremy Schulman, Juniper Networks
+* Ankit Jain, Juniper Networks
