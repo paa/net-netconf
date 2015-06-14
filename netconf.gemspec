@@ -5,8 +5,8 @@ require 'net/netconf/version'
 Gem::Specification.new do |s|
   s.name = 'net-netconf'
   s.version = Netconf::VERSION
-  s.summary = "NetConf client"
-  s.description = "Ruby NetConf client"
+  s.summary = "Updated NetConf client"
+  s.description = "Updated and maintained fork of the Juniper Ruby NetConf client"
   s.homepage = 'https://github.com/kkirsche/net-netconf'
   s.authors = ["Kevin Kirsche"]
   s.email = 'kev.kirsche@gmail.com'
