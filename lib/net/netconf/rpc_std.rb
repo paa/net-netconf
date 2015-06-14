@@ -13,11 +13,9 @@ module Netconf
 EOM
 
   module Standard
-
     def lock( target )
-      rpc = Nokogiri::XML( "<rpc><lock><target><#{target}/></target></lock></rpc>" ).root
-      Netconf::RPC.set_exception( rpc, Netconf::LockError )
-      @trans.rpc_exec( rpc )
+      run_valid_or_lock_rpc "<rpc><lock><target><#{target}/></target></lock></rpc>",
+                            Netconf::LockError
     end
 
     def unlock( target )
@@ -26,8 +24,13 @@ EOM
     end
 
     def validate( source )
-      rpc = Nokogiri::XML( "<rpc><validate><source><#{source}/></source></validate></rpc>" ).root
-      Netconf::RPC.set_exception( rpc, Netconf::ValidateError )
+      run_valid_or_lock_rpc "<rpc><validate><source><#{source}/></source></validate></rpc>",
+                            Netconf::ValidateError
+    end
+
+    def run_valid_or_lock_rpc(rpc_string, error_type)
+      rpc = Nokogiri::XML(rpc_string).root
+      Netconf::RPC.set_exception( rpc, error_type )
       @trans.rpc_exec( rpc )
     end
 
@@ -42,11 +45,7 @@ EOM
       @trans.rpc_exec( rpc )
     end
 
-    def get_config( *args ) # :yeield: filter_builder
-
-      source = 'running'    # default source is 'running'
-      filter = nil          # no filter by default
-
+    def process_args(args)
       while arg = args.shift
         case arg.class.to_s
         when /^Nokogiri/
@@ -59,6 +58,14 @@ EOM
         when 'String' then source = arg
         end
       end
+    end
+
+    def get_config( *args ) # :yeield: filter_builder
+
+      source = 'running'    # default source is 'running'
+      filter = nil          # no filter by default
+
+      arg = process_args(args)
 
       rpc = Nokogiri::XML("<rpc><get-config><source><#{source}/></source></get-config></rpc>").root
 
@@ -87,18 +94,7 @@ EOM
       config = nil
       options = {}
 
-      while arg = args.shift
-        case arg.class.to_s
-        when /^Nokogiri/
-          config = case arg
-            when Nokogiri::XML::Builder  then arg.doc.root
-            when Nokogiri::XML::Document then arg.root
-            else arg
-            end
-        when 'Hash' then options = arg
-        when 'String' then target = arg
-        end
-      end
+      arg = process_args(args)
 
       toplevel = options[:toplevel] if options[:toplevel]
 

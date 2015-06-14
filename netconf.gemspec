@@ -6,7 +6,7 @@ Gem::Specification.new do |s|
   s.name = 'net-netconf'
   s.version = Netconf::VERSION
   s.summary = "Updated NetConf client"
-  s.description = "Updated and maintained fork of the Juniper Ruby NetConf client"
+  s.description = "Updated and maintained fork of the Juniper Ruby NetConf client. This is used to manage Junos OS devices."
   s.homepage = 'https://github.com/kkirsche/net-netconf'
   s.authors = ["Kevin Kirsche"]
   s.email = 'kev.kirsche@gmail.com'
