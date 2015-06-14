@@ -1,3 +1,5 @@
+[![Code Climate](https://codeclimate.com/github/kkirsche/net-netconf/badges/gpa.svg)](https://codeclimate.com/github/kkirsche/net-netconf)
+
 # NetConf
 
 ## Description:
