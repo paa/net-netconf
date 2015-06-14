@@ -12,21 +12,20 @@
 
 module Netconf
   class Transport
-
     attr_reader :rpc, :state, :session_id, :capabilities
     attr_writer :timeout, :waitio
 
-    def initialize( &block )
+    def initialize(&block)
       @state = :NETCONF_CLOSED
       @os_type = @args[:os_type] || Netconf::DEFAULT_OS_TYPE
 
-      @rpc = Netconf::RPC::Executor.new( self, @os_type )
+      @rpc = Netconf::RPC::Executor.new(self, @os_type)
       @rpc_message_id = 1
 
       if block_given?
         open(&block = nil)      # do not pass this block to open()
         yield self
-        close()
+        close
       end
     end # initialize
 
@@ -38,25 +37,24 @@ module Netconf
       @state == :NECONF_CLOSED
     end
 
-    def open( &block ) # :yield: specialized transport open, generally not used
-
+    def open(&block) # :yield: specialized transport open, generally not used
       raise Netconf::StateError if @state == :NETCONF_OPEN
 
       # block is used to deal with special open processing ...
       # this is *NOT* the block passed to initialize()
-      raise Netconf::OpenError unless trans_open( &block )
+      raise Netconf::OpenError unless trans_open(&block)
 
       # read the <hello> from the server and parse out
       # the capabilities and session-id
 
-      hello_rsp = Nokogiri::XML( trans_receive_hello() )
+      hello_rsp = Nokogiri::XML(trans_receive_hello)
       hello_rsp.remove_namespaces!
 
-      @capabilities = hello_rsp.xpath('//capability').map{ |c| c.text }
+      @capabilities = hello_rsp.xpath('//capability').map { |c| c.text }
       @session_id = hello_rsp.xpath('//session-id').text
 
       # send the <hello>
-      trans_send_hello()
+      trans_send_hello
 
       @state = :NETCONF_OPEN
       self
@@ -67,27 +65,27 @@ module Netconf
     end
 
     def trans_send_hello
-      trans_send( Netconf::RPC::MSG_HELLO )
-      trans_send( RPC::MSG_END )
+      trans_send(Netconf::RPC::MSG_HELLO)
+      trans_send(RPC::MSG_END)
     end
 
-    def has_capability?( capability )
-      @capabilities.select{|c| c.include? capability }.pop
+    def has_capability?(capability)
+      @capabilities.select { |c| c.include? capability }.pop
       # note: the caller could also simply use #grep on @capabilities
     end
 
     def close
       raise Netconf::StateError unless @state == :NETCONF_OPEN
-      trans_close()
+      trans_close
       @state = :NETCONF_CLOSED
       self
     end
 
     # string in; string out
-    def send_and_receive( cmd_str )
-      trans_send( cmd_str )
-      trans_send( RPC::MSG_END )
-      trans_receive()
+    def send_and_receive(cmd_str)
+      trans_send(cmd_str)
+      trans_send(RPC::MSG_END)
+      trans_receive
     end
 
     def rpc_exec( cmd_nx )
@@ -104,7 +102,7 @@ module Netconf
       # receive the response; then covert it to a Nokogiri XML
       # object so we can process it.
 
-      rsp_nx = Nokogiri::XML( send_and_receive( cmd_nx.to_xml ))
+      rsp_nx = Nokogiri::XML(send_and_receive(cmd_nx.to_xml))
 
       # the following removes only the default namespace (xmlns)
       # definitions from the document.  This is an alternative
@@ -113,7 +111,7 @@ module Netconf
       # nice "compromise" ... just don't know what it does
       # performance-wise on large datasets.
 
-      rsp_nx.traverse{ |n| n.namespace = nil }
+      rsp_nx.traverse { |n| n.namespace = nil }
 
       # set the response context to the root node; <rpc-reply>
 
@@ -135,9 +133,9 @@ module Netconf
         # or if the caller wants to raise if severity == 'warning'
         # then generate the exception
 
-        if(( sev_err.count > 0 ) || Netconf::raise_on_warning )
-          exception = Netconf::RPC.get_exception( cmd_nx )
-          raise exception.new( self, cmd_nx, rsp_nx )
+        if (sev_err.count > 0) || Netconf.raise_on_warning
+          exception = Netconf::RPC.get_exception(cmd_nx)
+          raise exception.new(self, cmd_nx, rsp_nx)
         end
       end
 
@@ -147,9 +145,6 @@ module Netconf
       # @@@/JLS: the generic case.
 
       rsp_nx.first_element_child
-
     end
-
-
   end #--class: Transport
 end #--module: Netconf
