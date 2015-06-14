@@ -10,7 +10,7 @@ module Netconf
 
     DELETE = { :delete => 'delete' }
     REPLACE = { :replace => 'replace' }
- 
+
     attr_reader :doc
     attr_reader :collection
 
