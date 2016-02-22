@@ -3,15 +3,16 @@ require 'rake'
 require 'net/netconf/version'
 
 Gem::Specification.new do |s|
-  s.name = 'netconf'
+  s.name = 'net-netconf'
   s.version = Netconf::VERSION
-  s.summary = "NETCONF client"
-  s.description = "Extensible Ruby-based NETCONF client"
-  s.homepage = 'https://github.com/Juniper/net-netconf'
-  s.authors = ["Jeremy Schulman", "Ankit Jain"]
-  s.email = 'jschulman@juniper.net'
+  s.summary = "Updated NetConf client"
+  s.description = "Updated and maintained fork of the Juniper Ruby NetConf client. This is used to manage Junos OS devices."
+  s.homepage = 'https://github.com/kkirsche/net-netconf'
+  s.authors = ["Kevin Kirsche", "Jeremy Schulman", "Ankit Jain"]
+  s.email = 'kev.kirsche@gmail.com'
   s.files = FileList['lib/net/**/*.rb', 'examples/**/*.rb']
-  s.add_dependency('nokogiri', '>= 1.5.5')
-  s.add_dependency('net-ssh', '>= 2.5.2')
-  s.add_dependency('net-scp')
+  s.license = 'BSD 2'
+  s.add_dependency('nokogiri', '~> 1.6')
+  s.add_dependency('net-ssh', '~> 2.9')
+  s.add_dependency('net-scp', '~> 1.2')
 end
