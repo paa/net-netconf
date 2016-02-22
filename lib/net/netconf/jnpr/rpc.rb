@@ -35,6 +35,7 @@ module Netconf
                  when Nokogiri::XML::Builder  then arg.doc.root
                  when Nokogiri::XML::Document then arg.root
                  else arg
+                 end
       end
 
       def get_configuration(*args)
@@ -156,7 +157,6 @@ module Netconf
         end
         @trans.rpc_exec(rpc_nx)
       end
-      end # module: JUNOS
-    end # module: RPC
-  end # module: Netconf
-end
+    end # module: JUNOS
+  end # module: RPC
+end # module: Netconf
