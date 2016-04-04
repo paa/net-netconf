@@ -89,7 +89,8 @@ module Netconf
     def scp
       @scp ||= Net::SCP.start(@args[:target],
                               @args[:username],
-                              password: @args[:password])
+                              password: @args[:password],
+                              port: @args[:port] || 22)
     end
   end # class: SSH
 end # module: Netconf
