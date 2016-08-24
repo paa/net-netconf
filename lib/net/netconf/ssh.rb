@@ -77,10 +77,16 @@ module Netconf
 
       @trans[:conn].loop { @trans[:more] }
 
+      puts "show me recvd data!!!"
+      p @trans[:rx_buf]
+
       @trans[:rx_buf]
     end
 
     def trans_send(cmd_str)
+      puts "show me sent data!!!"
+      p cmd_str
+
       @trans[:chan].send_data(cmd_str)
     end
 
