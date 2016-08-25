@@ -87,9 +87,14 @@ module Netconf
     
     # string in; string out
     def send_and_receive( cmd_str )
-      chunked_cmd = "\n##{cmd_str.length}\n#{cmd_str}\n##\n\n"
-      trans_send( chunked_cmd )
-      # trans_send( RPC::MSG_END )
+      #require 'pry'; binding.pry
+      if has_capability?("urn:ietf:params:netconf:base:1.1")
+        chunked_cmd = "\n##{cmd_str.length}\n#{cmd_str}\n##\n"
+        trans_send( chunked_cmd )
+      else
+        trans_send( cmd_str )
+        trans_send( RPC::MSG_END )
+      end
       trans_receive()
     end
     

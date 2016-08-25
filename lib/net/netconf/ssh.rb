@@ -57,11 +57,15 @@ module Netconf
       # the #loop method
 
       @trans[:chan].on_data do |_ch, data|
-        if data.include?(RPC::MSG_END)
+        #require 'pry'; binding.pry
+        if (data.include?(RPC::MSG_END) or data.include?("\n##\n"))
           data.slice!(RPC::MSG_END)
+          data.slice!("\n##\n")
+          data.slice!(/\n#\d+\n*$/)
           @trans[:rx_buf] << data unless data.empty?
           @trans[:more] = false
         else
+          data.slice!(/\n#\d+\n*$/)
           @trans[:rx_buf] << data
         end
       end
@@ -86,7 +90,7 @@ module Netconf
     def trans_send(cmd_str)
       puts "show me sent data!!!"
       p cmd_str
-
+      #require 'pry'; binding.pry
       @trans[:chan].send_data(cmd_str)
     end
 
