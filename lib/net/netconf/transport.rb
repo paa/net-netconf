@@ -80,6 +80,7 @@ module Netconf
         
     def close
       raise Netconf::StateError unless @state == :NETCONF_OPEN         
+      rpc.close_session
       trans_close()
       @state = :NETCONF_CLOSED            
       self

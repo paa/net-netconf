@@ -48,6 +48,11 @@ EOM
       @trans.rpc_exec( rpc )
     end
 
+    def close_session
+      rpc = Nokogiri::XML( MSG_CLOSE_SESSION ).root
+      @trans.rpc_exec( rpc )
+    end
+
     def process_args(args)
       while arg = args.shift
         case arg.class.to_s

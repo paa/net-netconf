@@ -46,6 +46,8 @@ module Netconf
     def trans_close
       @trans[:chan].close if @trans[:chan]
       @trans[:conn].close if @trans[:conn]
+      rescue Net::SSH::Disconnect
+        # remote connection has closed
     end
 
     def trans_receive
