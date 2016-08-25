@@ -3,6 +3,8 @@ module Netconf
 
     MSG_END = ']]>]]>'
     MSG_END_RE = /\]\]>\]\]>[\r\n]*$/
+    MSG_END_1_1 = "\n##\n"
+    MSG_CHUNK_SIZE_RE = /\n#\d+\n*$/
     MSG_CLOSE_SESSION = '<rpc><close-session/></rpc>'
     MSG_HELLO = <<-EOM
 <hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
