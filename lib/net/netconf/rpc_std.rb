@@ -53,30 +53,19 @@ EOM
       @trans.rpc_exec( rpc )
     end
 
-    def process_args(args)
-      output = {}
-      while arg = args.shift
-        case arg.class.to_s
-        when /^Nokogiri/
-          output["filter"] = case arg
-            when Nokogiri::XML::Builder  then arg.doc.root
-            when Nokogiri::XML::Document then arg.root
-            else arg
-            end
-        when 'Hash' then output["attrs"] = arg
-        when 'String' then output["source"] = arg
+    def munge_xml(data)
+      case data.class.to_s
+      when /^Nokogiri/
+        case data
+        when Nokogiri::XML::Builder  then data.doc.root
+        when Nokogiri::XML::Document then data.root
+        else data
         end
+      when 'String' then Nokogiri::XML(data).root
       end
-      return output
     end
 
-    def get_config( *args ) # :yeield: filter_builder
-
-      source = 'running'    # default source is 'running'
-      filter = nil          # no filter by default
-
-      arg = process_args(args)
-
+    def get_config(source: 'running', filter: nil)
       rpc = Nokogiri::XML("<rpc><get-config><source><#{source}/></source></get-config></rpc>").root
 
       if block_given?
@@ -87,27 +76,22 @@ EOM
         }
       end
 
-      if arg.has_key?("filter")
-        f_node = Nokogiri::XML::Node.new( 'filter', rpc )
-        f_node['type'] = 'subtree'
-        f_node << arg["filter"]
-        rpc.at('get-config') <<  f_node
+      if filter
+        f_xml = munge_xml(filter)
+        if f_xml
+          f_node = Nokogiri::XML::Node.new( 'filter', rpc )
+          f_node['type'] = 'subtree'
+          f_node << f_xml
+          rpc.at('get-config') <<  f_node
+        else
+          raise ArgumentError, "filter must be valid XML string or object!"
+        end
       end
 
       @trans.rpc_exec( rpc )
     end
 
-    def edit_config( *args ) # :yeield: config_builder
-      require 'pry'; binding.pry
-      toplevel = 'config'   # default toplevel config element
-      target = 'candidate'  # default source is 'candidate'  @@@/JLS hack; need to fix this
-      config = nil
-      options = {}
-
-      arg = process_args(args)
-
-      toplevel = options[:toplevel] if options[:toplevel]
-
+    def edit_config(toplevel: 'config', target: 'candidate', config: nil)
       rpc_str = <<-EO_RPC
 <rpc>
 <edit-config>
@@ -124,7 +108,12 @@ EO_RPC
           yield( xml )
         }
       elsif config
-        rpc.at( toplevel ) << config.dup
+        conf_xml = munge_xml(config)
+        if conf_xml
+          rpc.at( toplevel ) << conf_xml
+        else
+          raise ArgumentError, "config must be valid XML string or object!"
+        end
       else
         raise ArgumentError, "You must specify edit-config data!"
       end
