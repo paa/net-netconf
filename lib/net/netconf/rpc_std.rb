@@ -92,6 +92,10 @@ EOM
     end
 
     def edit_config(toplevel: 'config', target: 'candidate', config: nil)
+      # Check if device supports default of candidate config and if not fall back to running
+      if (!@trans.has_capability?("urn:ietf:params:netconf:capability:candidate:1.0") and target == 'candidate')
+        target = 'running'
+      end
       rpc_str = <<-EO_RPC
 <rpc>
 <edit-config>
