@@ -4,8 +4,10 @@
 
 ## Description:
 
-Device management using the NetConf protocol as specified in [RFC4741](http://tools.ietf.org/html/rfc4741)
-and [RFC6241](http://tools.ietf.org/html/rfc6241).
+Device management using the NETCONF protocol as specified in [RFC4741](http://tools.ietf.org/html/rfc4741),
+[RFC6241](http://tools.ietf.org/html/rfc6241), and [RFC6242](https://tools.ietf.org/html/rfc6242)*.
+
+\* Currently does not validate NETCONF 1.1 messages received are of proper chunk length.
 
 ## Features:
 

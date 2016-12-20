@@ -1,5 +1,6 @@
 require 'net/ssh'
 require 'net/netconf/ssh'
+require 'colorize'
 
 module Netconf
   class SSH < Netconf::Transport
@@ -81,11 +82,21 @@ module Netconf
       # ssh event processing ...
 
       @trans[:conn].loop { @trans[:more] }
-
+      if @args[:debug] && @trans[:rx_buf] !~ /<\/hello>/
+        puts "Data Received:".colorize(:light_yellow).underline
+        puts Nokogiri::XML(@trans[:rx_buf]).root.to_xml.colorize(:light_yellow)
+        puts "\n"
+      end
       @trans[:rx_buf]
     end
 
     def trans_send(cmd_str)
+      if @args[:debug] && cmd_str !~ /<\/hello>/ && !cmd_str.include?(RPC::MSG_END) && !cmd_str.include?(RPC::MSG_END_1_1)
+        puts "\n"
+        puts "Data Sent:".colorize(:light_green).underline
+        puts Nokogiri::XML(cmd_str.split(RPC::MSG_CHUNK_SIZE_RE)[1]).root.to_xml.colorize(:light_green)
+        puts "\n"
+      end
       @trans[:chan].send_data(cmd_str)
     end
 
