@@ -1,5 +1,4 @@
 $LOAD_PATH.unshift 'lib'
-require 'rake'
 require 'net/netconf/version'
 
 Gem::Specification.new do |s|
@@ -11,7 +10,7 @@ Gem::Specification.new do |s|
   s.homepage = 'https://github.com/kkirsche/net-netconf'
   s.authors = ["Rick Sherman", "Kevin Kirsche", "Jeremy Schulman", "Ankit Jain"]
   s.email = 'kev.kirsche@gmail.com'
-  s.files = FileList['lib/net/**/*.rb', 'examples/**/*.rb']
+  s.files = Dir.glob("{lib/net,examples}/**/*.rb")
   s.license = 'BSD-2-Clause'
   s.add_dependency('nokogiri', '>= 1.6')
   s.add_dependency('net-ssh', '>= 2.9', '< 3.3')
