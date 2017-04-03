@@ -1,20 +1,23 @@
-require 'nokogiri'
+# frozen_string_literal: true
 
+require 'nokogiri'
 require 'net/netconf/version'
 require 'net/netconf/rpc'
 require 'net/netconf/exception'
 require 'net/netconf/transport'
 require 'net/netconf/ssh'
 
+# base Netconf constants and methods
 module Netconf
-  NAMESPACE = "urn:ietf:params:xml:ns:netconf:base:1.0"
+  NAMESPACE = 'urn:ietf:params:xml:ns:netconf:base:1.0'
   DEFAULT_OS_TYPE = :Junos
   DEFAULT_TIMEOUT = 10
   DEFAULT_WAITIO = 0
 
-  @raise_on_warning = false # rpc-error with <error-severity> = 'warning' will not raise RpcError excption
+  # do not raise RpcError exception when rpc returns a warning
+  @raise_on_warning = false
 
-  def self.raise_on_warning=( bool )
+  def self.raise_on_warning=(bool)
     @raise_on_warning = bool
   end
 
@@ -27,7 +30,6 @@ module Netconf
     wait_io = @trans_waitio
 
     time_out = nil if time_out == false
-    done = false
     rx_buf = ''
 
     until( rx_buf.match( on_re ) and not IO::select( [@trans], nil, nil, wait_io ) )

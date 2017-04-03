@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'net/netconf'
 require 'net/netconf/ioproc'
 require 'net/netconf/jnpr'

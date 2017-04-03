@@ -1,158 +1,160 @@
+# frozen_string_literal: true
+
 module Netconf
   module RPC
-
     MSG_END = ']]>]]>'
     MSG_END_RE = /\]\]>\]\]>[\r\n]*$/
     MSG_END_1_1 = "\n##\n"
     MSG_CHUNK_SIZE_RE = /\n#\d+\n*$/
     MSG_CLOSE_SESSION = '<rpc><close-session/></rpc>'
-    MSG_HELLO = <<-EOM
-<hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
-  <capabilities>
-    <capability>urn:ietf:params:netconf:base:1.0</capability>
-    <capability>urn:ietf:params:netconf:base:1.1</capability>
-  </capabilities>
-</hello>
-EOM
+    MSG_HELLO = <<-EOM.gsub(/\s+\|/, '')
+      |<hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+      |  <capabilities>
+      |    <capability>urn:ietf:params:netconf:base:1.0</capability>
+      |    <capability>urn:ietf:params:netconf:base:1.1</capability>
+      |  </capabilities>
+      |</hello>
+    EOM
 
-  module Standard
-    def lock( target )
-      run_valid_or_lock_rpc "<rpc><lock><target><#{target}/></target></lock></rpc>",
-                            Netconf::LockError
-    end
+    module Standard
+      def lock(target)
+        run_valid_or_lock_rpc("<lock><target><#{target}/></target></lock>",
+                              Netconf::LockError)
 
-    def unlock( target )
-      rpc = Nokogiri::XML( "<rpc><unlock><target><#{target}/></target></unlock></rpc>" ).root
-      @trans.rpc_exec( rpc )
-    end
-
-    def validate( source )
-      run_valid_or_lock_rpc "<rpc><validate><source><#{source}/></source></validate></rpc>",
-                            Netconf::ValidateError
-    end
-
-    def run_valid_or_lock_rpc(rpc_string, error_type)
-      rpc = Nokogiri::XML(rpc_string).root
-      Netconf::RPC.set_exception( rpc, error_type )
-      @trans.rpc_exec( rpc )
-    end
-
-    def commit
-      rpc = Nokogiri::XML( "<rpc><commit/></rpc>" ).root
-      Netconf::RPC.set_exception( rpc, Netconf::CommitError )
-      @trans.rpc_exec( rpc )
-    end
-
-    def delete_config( target )
-      rpc = Nokogiri::XML( "<rpc><delete-config><target><#{target}/></target></delete-config></rpc>" ).root
-      @trans.rpc_exec( rpc )
-    end
-
-    def close_session
-      rpc = Nokogiri::XML( MSG_CLOSE_SESSION ).root
-      @trans.rpc_exec( rpc )
-    end
-
-    def munge_xml(data)
-      case data.class.to_s
-      when /^Nokogiri/
-        case data
-        when Nokogiri::XML::Builder  then data.doc.root
-        when Nokogiri::XML::Document then data.root
-        else data
-        end
-      when 'String' then Nokogiri::XML(data).root
       end
-    end
 
-    def get(filter: nil)
-      rpc = Nokogiri::XML("<rpc><get/></rpc>").root
+      def unlock(target)
+        rpc = Nokogiri::XML("<rpc><unlock><target><#{target}/></target></unlock></rpc>").root
+        @trans.rpc_exec(rpc)
+      end
 
-      if filter
-        f_xml = munge_xml(filter)
-        if f_xml
-          f_node = Nokogiri::XML::Node.new( 'filter', rpc )
-          f_node['type'] = 'subtree'
-          f_node << f_xml
-          rpc.at('get') <<  f_node
-        else
-          raise ArgumentError, "filter must be valid XML string or object!"
+      def validate(source)
+        run_valid_or_lock_rpc("<validate><source><#{source}/></source></validate>",
+                              Netconf::ValidateError)
+
+      end
+
+      def run_valid_or_lock_rpc(rpc_string, error_type)
+        rpc = Nokogiri::XML("<rpc>#{rpc_string}</rpc>").root
+        Netconf::RPC.set_exception(rpc, error_type)
+        @trans.rpc_exec(rpc)
+      end
+
+      def commit
+        rpc = Nokogiri::XML('<rpc><commit/></rpc>').root
+        Netconf::RPC.set_exception(rpc, Netconf::CommitError)
+        @trans.rpc_exec(rpc)
+      end
+
+      def delete_config(target)
+        rpc = Nokogiri::XML("<rpc><delete-config><target><#{target}/></target></delete-config></rpc>").root
+        @trans.rpc_exec(rpc)
+      end
+
+      def close_session
+        rpc = Nokogiri::XML(MSG_CLOSE_SESSION).root
+        @trans.rpc_exec(rpc)
+      end
+
+      def munge_xml(data)
+        case data.class.to_s
+        when /^Nokogiri/
+          case data
+          when Nokogiri::XML::Builder  then data.doc.root
+          when Nokogiri::XML::Document then data.root
+          else data
+          end
+        when 'String' then Nokogiri::XML(data).root
         end
       end
 
-      @trans.rpc_exec( rpc )
-    end
+      def get(filter: nil)
+        rpc = Nokogiri::XML('<rpc><get/></rpc>').root
 
-    def get_config(source: 'running', filter: nil)
-      rpc = Nokogiri::XML("<rpc><get-config><source><#{source}/></source></get-config></rpc>").root
+        if filter
+          f_xml = munge_xml(filter)
+          if f_xml
+            f_node = Nokogiri::XML::Node.new('filter', rpc)
+            f_node['type'] = 'subtree'
+            f_node << f_xml
+            rpc.at('get') <<  f_node
+          else
+            raise ArgumentError, 'filter must be valid XML string or object!'
+          end
+        end
 
-      if block_given?
-        Nokogiri::XML::Builder.with( rpc.at( 'get-config' )){ |xml|
-          xml.filter( :type => 'subtree' ) {
-            yield( xml )
+        @trans.rpc_exec(rpc)
+      end
+
+      def get_config(source: 'running', filter: nil)
+        rpc = Nokogiri::XML("<rpc><get-config><source><#{source}/></source></get-config></rpc>").root
+
+        if block_given?
+          Nokogiri::XML::Builder.with(rpc.at('get-config')){ |xml|
+            xml.filter(:type => 'subtree') {
+              yield(xml)
+            }
           }
-        }
-      end
-
-      if filter
-        f_xml = munge_xml(filter)
-        if f_xml
-          f_node = Nokogiri::XML::Node.new( 'filter', rpc )
-          f_node['type'] = 'subtree'
-          f_node << f_xml
-          rpc.at('get-config') <<  f_node
-        else
-          raise ArgumentError, "filter must be valid XML string or object!"
         end
-      end
 
-      @trans.rpc_exec( rpc )
-    end
-
-    ## This needs to be clened up re: topns - this isn't the greatest code in the world, it's just a tribute
-    def edit_config(toplevel: 'config', topns: 'xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0"', target: 'candidate', config: nil)
-      # Check if device supports default of candidate config and if not fall back to running
-      if (!@trans.has_capability?("urn:ietf:params:netconf:capability:candidate:1.0") and target == 'candidate')
-        target = 'running'
-      end
-      rpc_str = <<-EO_RPC
-<rpc>
-<edit-config>
-   <target><#{target}/></target>
-   <#{toplevel} #{topns}/>
-</edit-config>
-</rpc>
-EO_RPC
-
-      rpc = Nokogiri::XML( rpc_str ).root
-
-      if block_given?
-        Nokogiri::XML::Builder.with(rpc.at( toplevel )){ |xml|
-          yield( xml )
-        }
-      elsif config
-        conf_xml = munge_xml(config)
-        if conf_xml
-          rpc.at( toplevel ) << conf_xml
-        else
-          raise ArgumentError, "config must be valid XML string or object!"
+        if filter
+          f_xml = munge_xml(filter)
+          if f_xml
+            f_node = Nokogiri::XML::Node.new('filter', rpc)
+            f_node['type'] = 'subtree'
+            f_node << f_xml
+            rpc.at('get-config') <<  f_node
+          else
+            raise ArgumentError, 'filter must be valid XML string or object!'
+          end
         end
-      else
-        raise ArgumentError, "You must specify edit-config data!"
+
+        @trans.rpc_exec(rpc)
       end
 
-      Netconf::RPC.set_exception( rpc, Netconf::EditError )
-      @trans.rpc_exec( rpc )
+      ## This needs to be clened up re: topns - this isn't the greatest code in the world, it's just a tribute
+      def edit_config(toplevel: 'config', topns: 'xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0"', target: 'candidate', config: nil)
+        # Check if device supports default of candidate config and if not fall back to running
+        if (!@trans.has_capability?('urn:ietf:params:netconf:capability:candidate:1.0') and target == 'candidate')
+          target = 'running'
+        end
+        rpc_str = <<-EO_RPC.gsub(/^\s*\|/, '')
+          |<rpc>
+          |  <edit-config>
+          |     <target><#{target}/></target>
+          |     <#{toplevel} #{topns}/>
+          |  </edit-config>
+          |</rpc>
+        EO_RPC
+
+        rpc = Nokogiri::XML(rpc_str).root
+
+        if block_given?
+          Nokogiri::XML::Builder.with(rpc.at(toplevel)){ |xml|
+            yield(xml)
+          }
+        elsif config
+          conf_xml = munge_xml(config)
+          if conf_xml
+            rpc.at(toplevel) << conf_xml
+          else
+            raise ArgumentError, 'config must be valid XML string or object!'
+          end
+        else
+          raise ArgumentError, 'You must specify edit-config data!'
+        end
+
+        Netconf::RPC.set_exception(rpc, Netconf::EditError)
+        @trans.rpc_exec(rpc)
+      end
+
+      ## Start of get_exec - saving now for posterity
+      # def get_exec(format: nil, exec: )
+      #   rpc = Nokogiri::XML("<rpc><get><filter><config-format-text-cmd/><oper-data-format-text-block><exec>#{exec}</exec></oper-data-format-text-block></filter></get></rpc>").root
+      #
+      #   @trans.rpc_exec( rpc )
+      # end
+
     end
-
-    ## Start of get_exec - saving now for posterity
-    # def get_exec(format: nil, exec: )
-    #   rpc = Nokogiri::XML("<rpc><get><filter><config-format-text-cmd/><oper-data-format-text-block><exec>#{exec}</exec></oper-data-format-text-block></filter></get></rpc>").root
-    #
-    #   @trans.rpc_exec( rpc )
-    # end
-
-  end
-
   end # module: RPC
 end # module: Netconf

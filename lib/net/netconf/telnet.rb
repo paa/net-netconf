@@ -1,8 +1,10 @@
+# frozen_string_literal: true
+
 require 'net/telnet'
 
 module Netconf
   class Telnet < Netconf::Transport
-    def initialize(args, trans_args = nil, &block)
+    def initialize(args, _trans_args = nil, &block)
       os_type = args[:os_type] || Netconf::DEFAULT_OS_TYPE
       @args = args.clone
 
@@ -38,7 +40,7 @@ module Netconf
     end
 
     def trans_send(cmd_str)
-      @trans.write cmd_str
+      @trans.write(cmd_str)
     end
 
     def trans_receive

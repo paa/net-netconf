@@ -1,5 +1,6 @@
-module Netconf
+# frozen_string_literal: true
 
+module Netconf
   class InitError < StandardError
   end
 
@@ -9,13 +10,15 @@ module Netconf
   class OpenError < StandardError
   end
 
+  # returns RPC and error message
   class RpcError < StandardError
     attr_reader :trans
     attr_reader :cmd, :rsp
 
-    def initialize( trans, cmd, rsp )
+    def initialize(trans, cmd, rsp)
       @trans = trans
-      @cmd = cmd; @rsp = rsp;
+      @cmd = cmd
+      @rsp = rsp
     end
 
     def to_s
@@ -34,5 +37,4 @@ module Netconf
 
   class ValidateError < Netconf::RpcError
   end
-
 end

@@ -18,4 +18,5 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency('net-scp', '~> 1.2')
   s.add_runtime_dependency('colorize', '~> 0.8')
   s.add_development_dependency('pry-byebug')
+  s.add_development_dependency('rubocop', '~> 0.48')
 end

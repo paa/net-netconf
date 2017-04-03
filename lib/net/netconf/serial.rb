@@ -1,18 +1,18 @@
+# frozen_string_literal: true
+
 require 'serialport'
 
 module Netconf
-
   class Serial < Netconf::Transport
-
     DEFAULT_BAUD = 9600
     DEFAULT_DATABITS = 8
     DEFAULT_STOPBITS = 1
     DEFAULT_PARITY = SerialPort::NONE
-    DEFAULT_RDBLKSZ = (1024*1024)
+    DEFAULT_RDBLKSZ = (1024 * 1024)
 
     attr_reader :args
 
-    def initialize( args_h, &block )
+    def initialize(args_h, &block)
       os_type = args_h[:os_type] || Netconf::DEFAULT_OS_TYPE
 
       raise Netconf::InitError, "Missing 'port' param" unless args_h[:port]
@@ -26,16 +26,15 @@ module Netconf
       # this must be provided! if the caller does not, this will
       # throw a NameError exception.
 
-      extend Netconf::const_get( os_type )::TransSerial
+      extend Netconf::const_get(os_type)::TransSerial
 
       @trans_timeout = @args[:timeout] || Netconf::DEFAULT_TIMEOUT
       @trans_waitio = @args[:waitio] || Netconf::DEFAULT_WAITIO
 
-      super( &block )
+      super(&block)
     end
 
     def login
-
       begin
         puts
         waitfor(/ogin:/)
@@ -49,27 +48,26 @@ module Netconf
       waitfor(/assword:/)
       puts @args[:password]
 
-      waitfor( @args[:prompt] )
+      waitfor(@args[:prompt])
     end
 
     def trans_open # :yield: self
-
       baud = @args[:speed] || DEFAULT_BAUD
       data_bits = @args[:bits] || DEFAULT_DATABITS
       stop_bits = @args[:stop] || DEFAULT_STOPBITS
       parity = @args[:parity] || DEFAULT_PARITY
 
-      @trans = SerialPort.new( @args[:port], baud, data_bits, stop_bits, parity )
+      @trans = SerialPort.new(@args[:port], baud, data_bits, stop_bits, parity)
 
-      got = login()
+      got = login
       yield self if block_given?
-      trans_start_netconf( got )
+      trans_start_netconf(got)
 
       self
     end
 
     def trans_receive_hello
-      hello_str = trans_receive()
+      hello_str = trans_receive
       so_xml = hello_str.index("\n") + 1
       hello_str.slice!(0, so_xml)
       hello_str
@@ -84,21 +82,20 @@ module Netconf
       @trans.close
     end
 
-    def trans_send( cmd_str )
-      @trans.write( cmd_str )
+    def trans_send(cmd_str)
+      @trans.write(cmd_str)
     end
 
     def trans_receive
       Netconf.trans_receive
     end
 
-    def puts( str = nil )
+    def puts(str = nil)
       @trans.puts str
     end
 
-    def waitfor( this_re = nil )
+    def waitfor(on_re = nil)
       Netconf.waitfor(on_re)
     end
-
   end # class: Serial
 end # module: Netconf

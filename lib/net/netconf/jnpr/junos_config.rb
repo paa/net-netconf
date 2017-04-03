@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #
 # Copyright (c) 2012 Juniper Networks, Inc.
 # All Rights Reserved
@@ -6,8 +8,8 @@
 
 module Netconf
   class JunosConfig
-    DELETE = { delete: 'delete' }
-    REPLACE = { replace: 'replace' }
+    DELETE = { delete: 'delete' }.freeze
+    REPLACE = { replace: 'replace' }.freeze
 
     attr_reader :doc
     attr_reader :collection
@@ -16,13 +18,13 @@ module Netconf
       @doc_ele = 'configuration'
 
       if options == :TOP
-        @doc = Nokogiri::XML('<#{@doc_ele}/>')
+        @doc = Nokogiri::XML("<#{@doc_ele}/>")
         return
       end
 
       unless options[:TOP].nil?
         @doc_ele = options[:TOP]
-        @doc = Nokogiri::XML('<#{@doc_ele}/>')
+        @doc = Nokogiri::XML("<#{@doc_ele}/>")
         return
       end
 
@@ -30,7 +32,7 @@ module Netconf
         edit = "#{@doc_ele}/#{options[:edit].strip}"
         @at_name = edit[edit.rindex('/') + 1, edit.length]
         @edit_path = edit
-        @collection = Hash.new
+        @collection = {}
         @to_xml = options[:build]
       end
     end
@@ -51,7 +53,7 @@ module Netconf
         # no xpath anchor point, so we need to create it
         at_ele = edit_path(ng_xml, @edit_path)
       end
-      build_proc = (block_given?) ? block : @to_xml
+      build_proc = block_given? ? block : @to_xml
 
       @collection.each do |_k, v|
         with(at_ele) do |e|
@@ -60,7 +62,7 @@ module Netconf
       end
     end
 
-    def edit_path( ng_xml, xpath )
+    def edit_path(ng_xml, xpath)
       # junos configuration always begins with
       # the 'configuration' element, so don't make
       # the user enter it all the time
@@ -79,7 +81,7 @@ module Netconf
       until xpath_a.empty? || dot
         need_a.unshift xpath_a.pop
         check_xpath = xpath_a.join('/')
-        dot = ng_xml.at( check_xpath )
+        dot = ng_xml.at(check_xpath)
       end
 
       # start at the deepest level of what
@@ -90,7 +92,6 @@ module Netconf
       need_a.each do |ele|
         dot = dot.add_child(Nokogiri::XML::Node.new(ele, ng_xml))
       end
-
       dot
     end
 
@@ -98,5 +99,4 @@ module Netconf
       Nokogiri::XML::Builder.with(ng_xml, &block)
     end
   end
-  #-- class end
 end
