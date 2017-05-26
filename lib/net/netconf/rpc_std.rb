@@ -91,7 +91,8 @@ EOM
       @trans.rpc_exec( rpc )
     end
 
-    def edit_config(toplevel: 'config', target: 'candidate', config: nil)
+    ## This needs to be clened up re: topns - this isn't the greatest code in the world, it's just a tribute
+    def edit_config(toplevel: 'config', topns: 'xmlns:xc="urn:ietf:params:xml:ns:netconf:base:1.0"', target: 'candidate', config: nil)
       # Check if device supports default of candidate config and if not fall back to running
       if (!@trans.has_capability?("urn:ietf:params:netconf:capability:candidate:1.0") and target == 'candidate')
         target = 'running'
@@ -100,7 +101,7 @@ EOM
 <rpc>
 <edit-config>
    <target><#{target}/></target>
-   <#{toplevel}/>
+   <#{toplevel} #{topns}/>
 </edit-config>
 </rpc>
 EO_RPC
@@ -125,6 +126,13 @@ EO_RPC
       Netconf::RPC.set_exception( rpc, Netconf::EditError )
       @trans.rpc_exec( rpc )
     end
+
+    ## Start of get_exec - saving now for posterity
+    # def get_exec(format: nil, exec: )
+    #   rpc = Nokogiri::XML("<rpc><get><filter><config-format-text-cmd/><oper-data-format-text-block><exec>#{exec}</exec></oper-data-format-text-block></filter></get></rpc>").root
+    #
+    #   @trans.rpc_exec( rpc )
+    # end
 
   end
 

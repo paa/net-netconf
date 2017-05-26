@@ -15,5 +15,6 @@ Gem::Specification.new do |s|
   s.add_dependency('nokogiri', '>= 1.6')
   s.add_dependency('net-ssh', '>= 2.9', '< 3.3')
   s.add_dependency('net-scp', '>= 1.2')
+  s.add_dependency('colorize')
   s.add_development_dependency('pry-byebug')
 end
