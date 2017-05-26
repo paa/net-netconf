@@ -65,6 +65,24 @@ EOM
       end
     end
 
+    def get(filter: nil)
+      rpc = Nokogiri::XML("<rpc><get/></rpc>").root
+
+      if filter
+        f_xml = munge_xml(filter)
+        if f_xml
+          f_node = Nokogiri::XML::Node.new( 'filter', rpc )
+          f_node['type'] = 'subtree'
+          f_node << f_xml
+          rpc.at('get') <<  f_node
+        else
+          raise ArgumentError, "filter must be valid XML string or object!"
+        end
+      end
+
+      @trans.rpc_exec( rpc )
+    end
+
     def get_config(source: 'running', filter: nil)
       rpc = Nokogiri::XML("<rpc><get-config><source><#{source}/></source></get-config></rpc>").root
 
