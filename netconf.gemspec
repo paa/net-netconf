@@ -12,9 +12,10 @@ Gem::Specification.new do |s|
   s.email = 'kev.kirsche@gmail.com'
   s.files = Dir.glob("{lib/net,examples}/**/*.rb")
   s.license = 'BSD-2-Clause'
-  s.add_dependency('nokogiri', '>= 1.6')
-  s.add_dependency('net-ssh', '>= 2.9', '< 4.1')
-  s.add_dependency('net-scp', '>= 1.2')
-  s.add_dependency('colorize')
+  s.required_ruby_version = '>= 2.1.0'
+  s.add_runtime_dependency('nokogiri', '~> 1.6')
+  s.add_runtime_dependency('net-ssh', '~> 4.1')
+  s.add_runtime_dependency('net-scp', '~> 1.2')
+  s.add_runtime_dependency('colorize', '~> 0.8')
   s.add_development_dependency('pry-byebug')
 end
