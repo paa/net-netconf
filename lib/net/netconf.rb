@@ -30,7 +30,7 @@ module Netconf
     wait_io = @trans_waitio
 
     time_out = nil if time_out == false
-    rx_buf = ''
+    rx_buf = String.new
 
     until( rx_buf.match( on_re ) and not IO::select( [@trans], nil, nil, wait_io ) )
 

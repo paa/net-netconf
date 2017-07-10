@@ -37,7 +37,7 @@ module Netconf
         @trans[:chan] = @trans[:conn].open_channel do |ch|
           ch.subsystem(NETCONF_SUBSYSTEM)
         end
-      rescue Errno::ECONNREFUSED => e
+      rescue Errno::ECONNREFUSED
         if self.respond_to? 'trans_on_connect_refused'
           return trans_on_connect_refused(start_args)
         end
@@ -54,7 +54,7 @@ module Netconf
     end
 
     def trans_receive
-      @trans[:rx_buf] = ''
+      @trans[:rx_buf] = String.new
       @trans[:more] = true
 
       # collect the response data as it comes back ...
@@ -64,7 +64,7 @@ module Netconf
       @trans[:chan].on_data do |_ch, data|
         if (data.include?(RPC::MSG_END) || data.include?(RPC::MSG_END_1_1))
           data.slice!(RPC::MSG_END)
-          data.slice!(RPC::MSG_END)
+          data.slice!(RPC::MSG_END_1_1)
           data.slice!(RPC::MSG_CHUNK_SIZE_RE)
           @trans[:rx_buf] << data unless data.empty?
           @trans[:more] = false
@@ -85,7 +85,7 @@ module Netconf
 
       @trans[:conn].loop { @trans[:more] }
       if @args[:debug] && @trans[:rx_buf] !~ /<\/hello>/
-        puts "Data Received:".colorize(:light_yellow).underline
+        puts 'Data Received:'.colorize(:light_yellow).underline
         puts Nokogiri::XML(@trans[:rx_buf]).root.to_xml.colorize(:light_yellow)
         puts "\n"
       end
@@ -95,7 +95,7 @@ module Netconf
     def trans_send(cmd_str)
       if @args[:debug] && cmd_str !~ /<\/hello>/ && !cmd_str.include?(RPC::MSG_END) && !cmd_str.include?(RPC::MSG_END_1_1)
         puts "\n"
-        puts "Data Sent:".colorize(:light_green).underline
+        puts 'Data Sent:'.colorize(:light_green).underline
         puts Nokogiri::XML(cmd_str.split(RPC::MSG_CHUNK_SIZE_RE)[1]).root.to_xml.colorize(:light_green)
         puts "\n"
       end
